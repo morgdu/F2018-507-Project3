@@ -392,10 +392,33 @@ def interactive_prompt():
                         i += 1
                     table.append(row)
 
-                # pretty print
+                # pretty print old version - columns all 15
+                #for row in table:
+                    #col_width = 15
+                    #print("".join(str(word).ljust(col_width) for word in row))
+                
+                # pretty print new version - dynamic column widths
+                
+                # find max width of each column
+                space = [0,0,0,0,0,0]
                 for row in table:
-                    col_width = 15
-                    print("".join(str(word).ljust(col_width) for word in row))
+                    for i in range(len(row)):
+                        if len(str(row[i])) > space[i]:
+                            space[i] = len(str(row[i])) + 2 # padding
+
+
+                # print each row
+                for row in table:
+                    row_string = ""
+                    i = 0
+                    for item in row:
+                        if len(str(item)) < space[i]:
+                            item_str = str(item) + (" " * (space[i] - len(str(item))))
+                            row_string += item_str
+                        else:
+                            row_string += str(item)
+                        i += 1
+                    print("".join(row_string))
 
 # Make sure nothing runs or prints out when this file is run as a module
 if __name__=="__main__":
