@@ -335,3 +335,58 @@ def process_command(command):
 def load_help_text():
     with open('help.txt') as f:
         return f.read()
+# Part 3: Implement interactive prompt. We've started for you!
+def interactive_prompt():
+    help_text = load_help_text()
+    
+    response = ''
+
+    while response != 'exit':
+        response = input('Enter a command: ')
+
+        if response == 'exit':
+            print("Bye")
+            break
+
+        elif response == 'help':
+            print(help_text)
+            continue
+        
+        else:
+            # get query results from command
+            results = process_command(response)
+
+            if "Command not recognized" in results:
+                print(results)
+                continue
+
+            else:
+                # set up table to accumulate rows
+                table = []
+                
+                for tup in results:
+                    row = []
+                    i = 0
+                    for word in tup:
+                        # truncate string if too long
+                        if len(str(word)) > 12:
+                            word = str(word)[:12] + "..."
+                            row.append(word)
+                        # convert percent row from ##.0 --> ##%
+                        elif len(tup) == 6 and i == 4:
+                            percent = str(tup[4])[:-2] + "%"
+                            row.append(percent)
+                        else:
+                            row.append(word)
+                        i += 1
+                    table.append(row)
+                # print(table)
+
+                # pretty print
+                for row in table:
+                    col_width = 15
+                    print("".join(str(word).ljust(col_width) for word in row))
+
+# Make sure nothing runs or prints out when this file is run as a module
+if __name__=="__main__":
+    interactive_prompt()
