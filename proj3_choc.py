@@ -153,7 +153,7 @@ def process_command(command):
                 return "Command not recognized: " + command
     
         # base statement that selects values from table joins
-        statement = "SELECT b.SpecificBeanBarName, b.Company, c.EnglishName, b.Rating, b.CocoaPercent, c2.EnglishName FROM Bars b JOIN Countries c on b.CompanyLocationId = c.Id JOIN Countries c2 on b.BroadBeanOriginId = c2.Id"
+        statement = "SELECT b.SpecificBeanBarName, b.Company, c.EnglishName, b.Rating, b.CocoaPercent, c2.EnglishName FROM Bars b LEFT JOIN Countries c on b.CompanyLocationId = c.Id LEFT JOIN Countries c2 on b.BroadBeanOriginId = c2.Id"
 
         # if country value is a parameter, add where clause to SQL statement
         if country_region != "":
@@ -204,7 +204,7 @@ def process_command(command):
                 return "Command not recognized: " + command
     
         # base statement that selects correct values from table and joins
-        statement = "SELECT b.Company, c.EnglishName," + aggregate + " FROM Bars b JOIN Countries c on b.CompanyLocationId = c.Id"
+        statement = "SELECT b.Company, c.EnglishName," + aggregate + " FROM Bars b LEFT JOIN Countries c on b.CompanyLocationId = c.Id"
         # if country value is a parameter, add where clause to SQL statement
     
         if country_region != "":
@@ -227,7 +227,7 @@ def process_command(command):
         
         # set defaults
         country_region = ""
-        join_by = " FROM Bars b JOIN Countries c on b.CompanyLocationId = c.Id"
+        join_by = " FROM Bars b LEFT JOIN Countries c on b.CompanyLocationId = c.Id"
         order_by = "Rating"
         order = "DESC"
         num = 10
@@ -240,7 +240,7 @@ def process_command(command):
             elif "sellers" in param:
                 join_by = join_by
             elif "sources" in param:
-                join_by = " FROM Bars b JOIN Countries c on b.BroadBeanOriginId = c.Id"
+                join_by = " FROM Bars b LEFT JOIN Countries c on b.BroadBeanOriginId = c.Id"
             elif "ratings" in param:
                 order_by = "Rating"
                 aggregate = "AVG(b.Rating)"
@@ -335,6 +335,7 @@ def process_command(command):
 def load_help_text():
     with open('help.txt') as f:
         return f.read()
+
 # Part 3: Implement interactive prompt. We've started for you!
 def interactive_prompt():
     help_text = load_help_text()
@@ -367,20 +368,29 @@ def interactive_prompt():
                 for tup in results:
                     row = []
                     i = 0
+                    
                     for word in tup:
                         # truncate string if too long
-                        if len(str(word)) > 12:
+                        if len(str(word)) > 12 and not isinstance(word, float):
                             word = str(word)[:12] + "..."
                             row.append(word)
+                        # truncate decimal if too long
+                        elif isinstance(word, float) and len(tup) < 6:
+                            num = round(word, 1)
+                            row.append(num)
                         # convert percent row from ##.0 --> ##%
                         elif len(tup) == 6 and i == 4:
                             percent = str(tup[4])[:-2] + "%"
                             row.append(percent)
+                        elif len(tup) == 6 and i == 5:
+                            if tup[5] == None:
+                                row.append("Unknown")
+                            else:
+                                row.append(tup[5])
                         else:
                             row.append(word)
                         i += 1
                     table.append(row)
-                # print(table)
 
                 # pretty print
                 for row in table:
